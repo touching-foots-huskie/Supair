@@ -6,6 +6,7 @@ import pickle
 import os
 import copy
 
+import glob
 import numpy as np
 import tensorflow as tf
 from scipy.misc import imresize
@@ -16,7 +17,7 @@ import rat_spn
 import visualize
 import datasets
 import iou_score
-
+import vehicle_dataset
 
 np.set_printoptions(threshold=np.inf)
 
@@ -98,6 +99,18 @@ class SupairTrainer:
                 x_test = datasets.add_structured_noise(x_test)
                 visualize.store_images(x[0:10], log_path + '/img_struc_noisy')
             x_color = np.squeeze(x)
+        elif conf.dataset == 'vehicle':
+            # vehicle dataset
+            data_root = './data/vehicle_img'
+            file_name_list = glob.glob(data_root + '/*.jpeg')   
+            vd = vehicle_dataset.VehicleDataset(file_name_list)
+            (x, counts, y), (x_test, c_test, y_test) = vd.load()
+            x_color = np.squeeze(x)
+            x = visualize.rgb2gray(x_color)  # get into gray
+            x = np.clip(x, 0.0, 1.0)
+            x_test = visualize.rgb2gray(x_test)
+            x_test = np.clip(x_test, 0.0, 1.0)
+            bboxes = None
         elif conf.dataset == 'sprites':
             (x_color, counts, _), (x_test, c_test, _) = datasets.make_sprites(50000,
                                                                               path=conf.data_path)
@@ -379,17 +392,18 @@ def run_all_experiments():
 
 
 def run_one_experiment():
-    conf = config.SupairConfig()
+    conf = config.SupairConfig()  # setup config
     conf.num_epochs = 20
     conf.log_every = 100
     conf.visual = True
     conf.log_file = 'perf-log.csv'
-    conf.dataset = 'MNIST'
+    # conf.dataset = 'MNIST'  # come from dataset
+    conf.dataset = 'vehicle'  # come from dataset
     conf.structured_noise = True
     conf.background_model = True
     trainer = SupairTrainer(conf)
     trainer.run_training()
-    tf.reset_default_graph()
+    tf.reset_default_graph() # restart everything
 
 
 if __name__ == '__main__':

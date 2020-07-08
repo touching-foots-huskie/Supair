@@ -34,6 +34,7 @@ def add_structured_noise(images):
 
 
 def preprocess(data):
+    # normalization
     data = data.astype(np.float32)
     data /= data.max()  # Squash to [0, 1]
     return data

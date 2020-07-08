@@ -39,7 +39,7 @@ class SupairConfig:
         # data config
         self.dataset = 'MNIST'  # select dataset from 'MNIST', 'sprites', 'omniglot'
         self.data_path = './data'  # path to directory for loading and storing data
-        self.scene_width = self.scene_height = 50
+        self.scene_width = self.scene_height = 64  # 50 previous
         self.channels = 1
         self.noise = False  # add Gaussian noise
         self.structured_noise = False  # add background grid
